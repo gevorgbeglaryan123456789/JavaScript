@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select TicTacToe Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #CC0066;
+        }
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .button {
+            padding: 14px 30px;
+            margin: 10px;
+            font-size: 20px;
+            background-color: #CC0066;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        h1 {
+            margin-bottom: 20px;
+			color:white;
+        }
+		.button:hover {
+			text-decoration: underline;
+			color:white;
+		}
+    </style>
+</head>
+
+
+<body>
+    <div id="menu">
+        <h1>Select TicTacToe Game</h1>
+		
+        <a  href="humanvshuman.html" class="button">Human vs Human</a>
+        <a  href="humanvsroboteasy.html" class="button">Human vs AI Easy</a>
+        <a  href="humanvsrobothard.html" class="button">Human vs AI Hard</a>
+    </div>
+</body>
+</html>

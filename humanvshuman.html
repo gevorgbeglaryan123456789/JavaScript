@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe Game</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #fff;
+    }
+
+    #game-board {
+      position: relative;
+      width: 600px;
+      height: 600px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      border: 2px solid #c01e54;
+      background-color: white;
+    }
+
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial;
+      font-size: 6em;
+      color: #FFFFFF;
+      background-color: #CC0066;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .selectSym {
+      position: absolute;
+      background-color: rgba(205, 133, 63, 0.8);
+      width: 220px;
+      top: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border-radius: 5px;
+      color: yellow;
+      font-size: 2em;
+      left: 50%;
+      transform: translateX(-50%);
+      padding-top: 10px;
+      padding-bottom: 50px;
+      z-index: 2;
+    }
+
+    .selectSym button {
+      font-family: "Arial";
+      font-size: 50px;
+      margin: 10px;
+      padding: 5px;
+      width: 70px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: white;
+      color: black;
+    }
+
+    .selectSym p {
+      margin: 0;
+      margin-bottom: 20px;
+    }
+
+    .selectSym div {
+      display: flex;
+      gap: 10px;
+    }
+
+    #message {
+      display: none;
+      width: 196px;
+      height: 174px;
+      top: 130px;
+      background-color: rgba(205, 133, 63, 0.8);
+      position: absolute;
+      left: 50%;
+      transform: translate(-54%, 0);
+      padding: 20px;
+      text-align: center;
+      border-radius: 5px;
+      color: white;
+      font-size: 2em;
+      box-sizing: border-box;
+      z-index: 3;
+    }
+
+    #message p {
+      margin: 1;
+      margin-bottom: -4px; 
+    }
+
+    #message button {
+      font-family: "Arial";
+      padding: 2px 5px;
+      border: none;
+      border-radius: 1px;
+      background-color: white;
+      color: black;
+      display: inline-block; 
+      margin: 1px;
+      margin-bottom: 20px;
+      cursor: pointer;
+    }
+
+    #message button:first-of-type {
+      margin-right: 1.2px;
+    }
+
+    #message button:last-of-type {
+      margin-left: 1.2px;
+    }
+	
+    #canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none; 
+    }
+  </style>
+</head>
+<body>
+    <div id="game-board">
+        <div class="selectSym" id="select-sym">
+            <p>Select symbol:</p>
+            <div>
+                <button onclick="selectSym('X')">X</button>
+                <button onclick="selectSym('O')">O</button>
+            </div>
+        </div>
+        <div class="cell" onclick="handleMove(0, 0)"></div>
+        <div class="cell" onclick="handleMove(0, 1)"></div>
+        <div class="cell" onclick="handleMove(0, 2)"></div>
+        <div class="cell" onclick="handleMove(1, 0)"></div>
+        <div class="cell" onclick="handleMove(1, 1)"></div>
+        <div class="cell" onclick="handleMove(1, 2)"></div>
+        <div class="cell" onclick="handleMove(2, 0)"></div>
+        <div class="cell" onclick="handleMove(2, 1)"></div>
+        <div class="cell" onclick="handleMove(2, 2)"></div>
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="message">
+        <p id="result-message"></p>
+        <button onclick="resetGame()">Replay</button>
+        <button onclick="goHome()">Home</button>
+    </div>
+
+    <script>
+        let currentPlayer;
+        let gameEnded = false;
+        let selectedSymbol;
+        const board = [
+            ['', '', ''],
+            ['', '', ''],
+            ['', '', '']
+        ];
+
+        function selectSym(sym) {
+            selectedSymbol = sym;
+            currentPlayer = sym;
+            document.getElementById('select-sym').style.display = 'none';
+        }
+
+        function handleMove(row, col) {
+            if (gameEnded || !currentPlayer || board[row][col] !== '') return;
+
+            board[row][col] = currentPlayer;
+            const cell = document.getElementsByClassName('cell')[row * 3 + col];
+            cell.innerText = currentPlayer;
+
+            const winningCombination = checkWinner(currentPlayer);
+            if (winningCombination) {
+                drawWinningLine(winningCombination);
+                setTimeout(() => {
+                    if (currentPlayer === selectedSymbol) {
+                        displayResult("You win!");
+                    } else {
+                        displayResult("You lose!");
+                    }
+                }, ); 
+                gameEnded = true;
+            } else if (checkDraw()) {
+                gameEnded = true;
+                displayResult("It's a draw!");
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            }
+        }
+
+        function checkWinner(player) {
+            const winningLines = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (const line of winningLines) {
+                let win = true;
+                for (const cellIndex of line) {
+                    const row = Math.floor(cellIndex / 3);
+                    const col = cellIndex % 3;
+                    if (board[row][col] !== player) {
+                        win = false;
+                        break;
+                    }
+                }
+                if (win) return line;
+            }
+            return null;
+        }
+
+        function checkDraw() {
+            return board.flat().every(cell => cell !== '') && !checkWinner('X') && !checkWinner('O');
+        }
+
+        function drawWinningLine(winningCombination) {
+            const canvas = document.getElementById('canvas');
+            const table = document.getElementById('game-board');
+            const tableWidth = table.offsetWidth;
+            canvas.width = canvas.height = tableWidth;
+
+            const ctx = canvas.getContext('2d');
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+
+            const cellSize = tableWidth / 3;
+            let startX, startY, endX, endY;
+
+            const [a, b, c] = winningCombination;
+
+            if (a % 3 === b % 3 && a % 3 === c % 3) {
+                // Vertical win
+                startX = (a % 3) * cellSize + cellSize / 2;
+                startY = 10; // Add some padding
+                endX = startX;
+                endY = tableWidth - 10; // Subtract padding
+            } else if (Math.floor(a / 3) === Math.floor(b / 3) && Math.floor(a / 3) === Math.floor(c / 3)) {
+                // Horizontal win
+                startX = 10; // Add some padding
+                startY = Math.floor(a / 3) * cellSize + cellSize / 2;
+                endX = tableWidth - 10; // Subtract padding
+                endY = startY;
+            } else {
+                // Diagonal win
+                if (winningCombination.includes(0) && winningCombination.includes(4) && winningCombination.includes(8)) {
+                    startX = 10; // Add some padding
+                    startY = 10; // Add some padding
+                    endX = tableWidth - 10; // Subtract padding
+                    endY = tableWidth - 10; // Subtract padding
+                } else if (winningCombination.includes(2) && winningCombination.includes(4) && winningCombination.includes(6)) {
+                    startX = tableWidth - 10; // Subtract padding
+                    startY = 10; // Add some padding
+                    endX = 10; // Add some padding
+                    endY = tableWidth - 10; // Subtract padding
+                }
+            }
+
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+        }
+
+        function displayResult(result) {
+            const messageDiv = document.getElementById("message");
+            const resultMessage = document.getElementById("result-message");
+            resultMessage.innerText = result;
+            messageDiv.style.display = "block";
+        }
+
+        function resetGame() {
+            const messageDiv = document.getElementById("message");
+            messageDiv.style.display = "none";
+
+            for (let row = 0; row < 3; row++) {
+                for (let col = 0; col < 3; col++) {
+                    board[row][col] = '';
+                    const cell = document.getElementsByClassName('cell')[row * 3 + col];
+                    cell.innerText = '';
+                }
+            }
+
+            // Clear winning line (if drawn)
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Reset game state
+            gameEnded = false;
+            currentPlayer = undefined;
+
+            // Show symbol selection dialog again
+            document.getElementById('select-sym').style.display = 'block';
+        }
+		
+		function goHome() {
+            window.location.href = 'buttonsfirstpage.html';
+        }
+    </script>
+</body>
+</html>
